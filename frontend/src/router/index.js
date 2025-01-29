@@ -1,13 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import LoginPage from '../views/LoginPage.vue';
 import RegisterPage from '../views/RegisterPage.vue';
-import HomePage from '../views/HomePage.vue'; // Importă HomePage
-
+import HomePage from '../views/HomePage.vue'; 
 const routes = [
+  
+
   {
     path: '/',
-    name: 'Home', // Definește ruta principală
-    component: HomePage, // Asociază componenta HomePage
+    name: 'Home', 
+    component: HomePage, 
   },
   {
     path: '/login',

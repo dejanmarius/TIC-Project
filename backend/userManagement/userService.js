@@ -4,15 +4,17 @@ const db = require('../db_config/dbInit');
 
 
 const registerUser = async (req, res) => {
-    const { email, password, role } = req.body;
+    const {userName, email, password} = req.body;
 
     const newUser = {
+        name:userName,
         email: email,
         password: password,
-        role: 'user'
+        role: 'user',
+        createdAt: new Date()
     }
 
-    if (!email || !password) {
+    if (!userName||!email || !password ) {
         return res.status(400).json({ error: 'Email and password are required' });
     }
 
@@ -48,7 +50,6 @@ const checkEmailNotInUse = async (email) => {
     }
 };
 
-
 const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
@@ -78,8 +79,8 @@ const loginUser = async (req, res) => {
                 { expiresIn: '1h' }
             );
 
-            res.cookie('authcookie', token, { httpOnly: true, secure: true });
-            res.status(200).json({ msg: 'Login successful', token });
+            res.cookie('authcookie', token, { httpOnly: true, secure: false ,maxAge: 3600000 });
+            res.status(200).json({ msg: 'Login successful', role: userData.role });
         } else {
             return res.status(401).json({ error: 'Invalid email or password' });
         }

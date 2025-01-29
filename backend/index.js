@@ -6,6 +6,7 @@ const httpLogger = require('morgan');
 const cookieParser = require("cookie-parser");
 const logSlowRequests = require('./middlewares/logSlowRequest');
 const userRoutes = require('../backend/userManagement/userRouter');
+const auth = require('./middlewares/auth');
 dotenv.config();
 
 const app = express();
@@ -14,7 +15,7 @@ app.use(httpLogger('dev'));
 
 const corsConfig = {
     origin: 'http://localhost:8080', 
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials:true
   };
   
 app.use(cors(corsConfig));
@@ -27,6 +28,9 @@ app.use(cookieParser());
 app.get('/', (req, res) => {
     res.send('Hello World');
 });
+
+
+
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
