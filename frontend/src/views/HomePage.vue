@@ -1,6 +1,6 @@
 <template>
   <div class="div">
-    <AppNavbar />
+    <AppNavbar @searchUpdated="handleSearchUpdated" />
     <div class="hero">
       <h1>What to Watch - RateFlix</h1>
     </div>
@@ -8,10 +8,15 @@
     <div class="container-wrapper">
       <v-container fluid>
         <v-row class="movie-grid">
-          <v-col v-for="(movie, index) in movies" :key="index" cols="6" sm="4" md="3" lg="2" xl="2">
+          <v-col v-for="(movie, index) in filteredMovies" :key="index" cols="6" sm="4" md="3" lg="2" xl="2">
             <MovieCard :movie="movie" />
           </v-col>
+          <v-col v-if="filteredMovies.length === 0">
+            <p>No movies found for your search.</p>
+          </v-col>
         </v-row>
+
+
       </v-container>
     </div>
   </div>
@@ -20,6 +25,7 @@
 <script>
 import AppNavbar from '@/components/AppNavbar.vue'
 import MovieCard from '@/components/MovieCard.vue';
+
 
 export default {
   name: 'HomePage',
@@ -30,7 +36,18 @@ export default {
   data() {
     return {
       movies: [],
+      searchQuery: '',
     };
+  }, computed: {
+
+    filteredMovies() {
+      if (this.searchQuery.trim() === "") {
+        return this.movies;
+      }
+      return this.movies.filter(movie =>
+        movie.title.toLowerCase().includes(this.searchQuery.toLowerCase())
+      );
+    }
   },
   mounted() {
     this.getMovies();
@@ -54,7 +71,11 @@ export default {
         console.error('Error fetching movies:', error);
       }
     },
-    
+    handleSearchUpdated(query) {
+      this.searchQuery = query;
+    }
+
+    ,
     async addToWatchlist(movie) {
       const userId = this.$store.getters.getUserId;
       try {
@@ -90,6 +111,7 @@ export default {
 <style scoped>
 .div {
   background-color: black;
+  min-height: 100vh;
 }
 
 .hero {
@@ -115,6 +137,12 @@ export default {
 
 .v-col {
   padding: 5px !important;
+}
+
+.v-col p {
+  color: white;
+  text-align: center;
+  padding: 20px;
 }
 
 

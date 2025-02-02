@@ -1,11 +1,11 @@
 <template>
   <v-app-bar class="app-bar" prominent>
     <div class="app-bar-content">
-      <v-label class="app-bar-title" color="white">RateFlix</v-label>
+      <v-label class="app-bar-title" color="white" @click="navigateHome">RateFlix</v-label>
 
       <div class="search-container">
         <v-text-field class="search-field" v-model="searchQuery" placeholder="Search movie" variant="outlined"
-          append-inner-icon="mdi-magnify" density="compact" hide-details bg-color="#eeeeee"></v-text-field>
+          append-inner-icon="mdi-magnify" density="compact" hide-details bg-color="#eeeeee" @input="$emit('searchUpdated', searchQuery)" ></v-text-field>
       </div>
 
       <div class="actions">
@@ -55,9 +55,9 @@
 
   <v-dialog v-model="searchDialog" max-width="600px">
     <v-card>
-      <v-card-title class="text-h6">Caută filme...</v-card-title>
+      <v-card-title class="text-h6">Search movies</v-card-title>
       <v-card-text>
-        <v-text-field v-model="searchQuery" label="Caută..." variant="outlined" prepend-inner-icon="mdi-magnify"
+        <v-text-field v-model="searchQuery" label="Search..." variant="outlined" prepend-inner-icon="mdi-magnify " @input="$emit('searchUpdated', searchQuery)"
           hide-details></v-text-field>
       </v-card-text>
     </v-card>
@@ -79,12 +79,18 @@ export default {
     },
     userName() {
       return this.$store.getters.getUserName || "User";
-    }
+    },
+    
   },
   methods: {
+   
     openSearch() {
       this.searchDialog = true;
     },
+
+    navigateHome() {
+    this.$router.push('/'); 
+  },
     navigateToWatchlist() {
       if (this.isAuthenticated) {
         this.$router.push("/watchlist");
@@ -116,6 +122,7 @@ export default {
       }
     },
   },
+ 
 };
 </script>
 
