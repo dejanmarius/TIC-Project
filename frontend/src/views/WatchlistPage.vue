@@ -1,13 +1,15 @@
 <template>
   <div class="watchlist-page">
-    <AppNavbar />
+    <AppNavbar @searchUpdated="handleSearchUpdated" />
+
     <div class="hero">
       <h1>Your Watchlist</h1>
       <p>Your Watchlist is your go-to place for keeping track of all the movies and shows you want to watch.</p>
     </div>
+
     <div class="watchlist-content">
-      <div v-if="movies.length > 0" class="sort-options">
-        <span class="titles-count">{{ movies.length }} titles</span>
+      <div v-if="filteredMovies.length > 0" class="sort-options">
+        <span class="titles-count">{{ filteredMovies.length }} titles</span>
         <div class="sort-controls">
           <v-select v-model="sortBy" :items="sortOptions" label="Sort by" outlined dense class="sort-select"
             solo></v-select>
@@ -20,11 +22,11 @@
         </div>
       </div>
 
-      <div v-if="movies.length === 0" class="no-movies-message">
-        <p>Your watchlist is empty. Add some movies to get started!</p>
+      <div v-if="filteredMovies.length === 0" class="no-movies-message">
+        <p>No movies match your search criteria.</p>
       </div>
 
-      <div v-if="movies.length > 0" class="watchlist-items">
+      <div v-if="filteredMovies.length > 0" class="watchlist-items">
         <WatchlistMovieDetail v-for="movie in sortedMovies" :key="movie._id" :movie="movie"
           @delete-movie="deleteFromWatchlist" />
       </div>
@@ -35,7 +37,6 @@
     </div>
   </div>
 </template>
-
 
 <script>
 import AppNavbar from '@/components/AppNavbar.vue';
@@ -49,21 +50,24 @@ export default {
   },
   data() {
     return {
+      searchQuery: '', 
       sortBy: 'Alphabetical',
       sortDirection: 'asc',
       sortOptions: ['Alphabetical', 'Date added', 'Rating', 'Release Date'],
       movies: [],
+      filteredMovies: [], 
       snackbar: {
         visible: false,
         message: '',
         timeout: 3000,
       },
-
     };
   },
   computed: {
+
     sortedMovies() {
-      let sorted = [...this.movies];
+      let sorted = [...this.filteredMovies];
+
       if (this.sortBy === 'Alphabetical') {
         sorted.sort((a, b) => b.title.localeCompare(a.title));
       }
@@ -84,6 +88,21 @@ export default {
     }
   },
   methods: {
+    handleSearchUpdated(query) {
+      this.searchQuery = query;
+      this.filterMovies();
+    },
+
+    filterMovies() {
+      if (!this.searchQuery) {
+        this.filteredMovies = this.movies;
+      } else {
+        this.filteredMovies = this.movies.filter(movie =>
+          movie.title.toLowerCase().includes(this.searchQuery.toLowerCase())
+        );
+      }
+    },
+
     toggleSortDirection() {
       this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
     },
@@ -115,6 +134,7 @@ export default {
         const data = await response.json();
         console.log('Watchlist data:', data);
         this.movies = data.watchlist;
+        this.filteredMovies = data.watchlist; 
 
       } catch (error) {
         console.error('Error fetching watchlist:', error);
@@ -149,6 +169,7 @@ export default {
         const data = await response.json();
         console.log('Deleted movie from watchlist:', data);
         this.movies = this.movies.filter(m => m.id !== movieId);
+        this.filterMovies();
 
       } catch (error) {
         console.error('Error deleting movie from watchlist:', error);
@@ -159,7 +180,6 @@ export default {
   created: async function () {
     await this.fetchWatchlist();
   }
-
 }
 </script>
 
