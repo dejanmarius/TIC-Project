@@ -2,6 +2,9 @@ import { createRouter, createWebHistory } from 'vue-router';
 import LoginPage from '../views/LoginPage.vue';
 import RegisterPage from '../views/RegisterPage.vue';
 import HomePage from '../views/HomePage.vue'; 
+import WatchlistPage from '@/views/WatchlistPage.vue';
+import MovieDetailPage from '@/views/MovieDetailPage.vue';
+import AdminPage from '@/views/AdminPage.vue';
 const routes = [
   
 
@@ -20,6 +23,22 @@ const routes = [
     name: 'Register',
     component: RegisterPage,
   },
+  {
+    path: '/watchlist',
+    name: 'Watchlist',
+    component: WatchlistPage,
+  },
+  {
+    path: '/movie/:id',
+    name: 'MovieDetailPage',
+    component: MovieDetailPage,
+    props: true, // Permite transmiterea parametrului `id` ca prop
+  },
+  {
+    path:'/adminDashboard',
+    name:'AdminDashboard',
+    component: AdminPage,
+  }
 ];
 
 const router = createRouter({

@@ -1,4 +1,5 @@
 async function handleTokenExpiration(store, router) {
+  let errorMessage = '';
     try {
       await fetch('http://localhost:3000/logout', {
         method: 'POST',
@@ -7,11 +8,12 @@ async function handleTokenExpiration(store, router) {
   
       store.commit('clearAuthState');
       router.push('/login');
-      alert('Your session has expired. Please log in again.');
+      errorMessage = 'Your session has expired. Please log in again.';
     } catch (error) {
-      console.error('Logout error:', error);
-      alert('An error occurred during logout. Please try again.');
+      errorMessage = 'An error occurred during logout. Please try again.';
     }
+    return errorMessage;
   }
+
 
   export { handleTokenExpiration };

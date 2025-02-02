@@ -36,7 +36,7 @@ export default {
   },
   methods: {
     viewDetails(id) {
-      this.$router.push({ name: 'movieDetails', params: { id } });
+      this.$router.push({ name: 'MovieDetailPage', params: { id } });
     },
     async toggleWatchList(movie) {
       try {

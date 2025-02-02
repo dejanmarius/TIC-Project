@@ -1,20 +1,20 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../db_config/dbInit');
-
+const admin = require('firebase-admin');
 
 const registerUser = async (req, res) => {
-    const {userName, email, password} = req.body;
+    const {username, email, password} = req.body;
 
     const newUser = {
-        name:userName,
+        name:username,
         email: email,
         password: password,
         role: 'user',
         createdAt: new Date()
     }
 
-    if (!userName||!email || !password ) {
+    if (!username||!email || !password ) {
         return res.status(400).json({ error: 'Email and password are required' });
     }
 
@@ -80,7 +80,7 @@ const loginUser = async (req, res) => {
             );
 
             res.cookie('authcookie', token, { httpOnly: true, secure: false ,maxAge: 3600000 });
-            res.status(200).json({ msg: 'Login successful', role: userData.role });
+            res.status(200).json({ msg: 'Login successful', role: userData.role, name: userData.name, userId: querySnapshot.docs[0].id });
         } else {
             return res.status(401).json({ error: 'Invalid email or password' });
         }
@@ -91,4 +91,128 @@ const loginUser = async (req, res) => {
     }
 }
 
-module.exports = { registerUser, loginUser };
+const logoutUser = (req, res) => {
+    console.log('Logout request received');
+    res.clearCookie('authcookie',{ httpOnly: true, secure: false });
+    res.status(200).json({ msg: 'Logout successful' });
+}
+
+const addToWatchlist = async (req, res) => {
+    try {
+        const { userId, movieId } = req.body;
+
+        if (!userId || !movieId) {
+            return res.status(400).json({ message: "User Id and Movie Id are required." });
+        }
+
+        console.log(`Adding movieId ${movieId} to userId ${userId} watchlist`);
+
+
+        const watchlistItem = {
+            movieId: movieId,
+            addedAt: new Date().toISOString() 
+        };
+
+        const userRef = db.collection('users').doc(userId);
+        await userRef.update({
+            watchlist: admin.firestore.FieldValue.arrayUnion(watchlistItem)
+        });
+
+        res.status(200).json({ message: "Movie added to watchlist." });
+    } catch (error) {
+        console.error("Error adding to watchlist:", error);
+        res.status(500).json({ message: "Internal server error." });
+    }
+};
+
+const getWatchlist = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+
+        if (!userId) {
+            return res.status(400).json({ message: "User Id is required." });
+        }
+
+        const userRef = db.collection('users').doc(userId);
+        const userDoc = await userRef.get();
+
+        if (!userDoc.exists) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        const watchlist = userDoc.data().watchlist || [];
+        if (watchlist.length === 0) {
+            return res.status(200).json({ watchlist: [] });
+        }
+        const movieDetailsPromises = watchlist.map(async (item) => {
+            const movieDoc = await db.collection('movies').doc(item.movieId).get();
+            if (!movieDoc.exists) {
+                console.warn(`Movie not found: ${item.movieId}`);
+                return null;
+            }
+            return { id: movieDoc.id, ...movieDoc.data(), addedAt: item.addedAt };
+        });
+
+        const moviesWithDetails = (await Promise.all(movieDetailsPromises)).filter(movie => movie !== null);
+
+        res.status(200).json({ watchlist: moviesWithDetails });
+    } catch (error) {
+        console.error("Error getting watchlist:", error);
+        res.status(500).json({ message: "Internal server error." });
+    }
+};
+
+const deleteMovieFromWatchlist = async (req, res) => {
+    try {
+      const { userId, movieId } = req.params;
+  
+      if (!userId || !movieId) {
+        return res.status(400).json({ message: "User Id and Movie Id are required." });
+      }
+  
+      const userRef = db.collection('users').doc(userId);
+      const userDoc = await userRef.get();
+  
+      if (!userDoc.exists) {
+        return res.status(404).json({ message: "User not found." });
+      }
+  
+      // Fetch current watchlist
+      const user = userDoc.data();
+      const updatedWatchlist = user.watchlist.filter(item => item.movieId !== movieId);  // Filtrez doar filmul cu movieId respectiv
+  
+      // Verifică dacă watchlist-ul a fost actualizat corect
+      if (updatedWatchlist.length === user.watchlist.length) {
+        return res.status(404).json({ message: "Movie not found in watchlist." });  // Dacă nu există filmul, returnează eroare
+      }
+  
+      // Actualizează watchlist-ul utilizatorului
+      await userRef.update({
+        watchlist: updatedWatchlist
+      });
+  
+      res.status(200).json({ message: "Movie deleted from watchlist." });
+    } catch (error) {
+      console.error("Error deleting from watchlist:", error);
+      res.status(500).json({ message: "Internal server error." });
+    }
+  };
+  
+
+
+const getUsers = async (req, res) => {
+    try {
+        const usersRef = db.collection('users');
+        const usersSnapshot = await usersRef.get();
+        const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        res.status(200).json({ users });
+    } catch (error) {
+        console.error("Error getting users:", error);
+        res.status(500).json({ message: "Internal server error." });
+    }
+};
+
+
+
+
+module.exports = { registerUser, loginUser,logoutUser, addToWatchlist, getWatchlist, getUsers, deleteMovieFromWatchlist };
