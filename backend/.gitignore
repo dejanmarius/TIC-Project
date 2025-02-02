@@ -2,3 +2,4 @@
 .env
 db_config/*.json
 /userManagement/initAdmin.js
+/utils/users_credentials.json
