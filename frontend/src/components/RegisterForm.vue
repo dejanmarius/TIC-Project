@@ -25,7 +25,7 @@
           Create your account
         </v-btn>
         <v-card-text class="text-center">
-          <a @click="goTologin" class=" text-decoration-none" href="#" style="color: #3c4ebe">
+          <a @click.prevent ="goTologin" class=" text-decoration-none" href="#" style="color: #3c4ebe ;cursor: pointer;" >
             Already have an account? Sign in
             <v-icon icon="mdi-chevron-right"></v-icon>
           </a>
