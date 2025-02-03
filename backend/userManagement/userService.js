@@ -11,7 +11,7 @@ const registerUser = async (req, res) => {
         email: email,
         password: password,
         role: 'user',
-        createdAt: new Date()
+        createdAt: new Date().toISOString(),
     }
 
     if (!username||!email || !password ) {
@@ -199,11 +199,13 @@ const deleteMovieFromWatchlist = async (req, res) => {
   };
   
 
-
 const getUsers = async (req, res) => {
     try {
         const usersRef = db.collection('users');
         const usersSnapshot = await usersRef.get();
+        if (usersSnapshot.empty) {
+            return res.status(200).json({ users: [] });
+        }
         const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         res.status(200).json({ users });
     } catch (error) {
@@ -212,7 +214,59 @@ const getUsers = async (req, res) => {
     }
 };
 
+const updateUser = async (req, res) => {
+    const { id } = req.params;
+    const { name, email, role } = req.body;
 
+    if (!name || !email || !role) {
+        return res.status(400).json({ error: 'Name, email, and role are required.' });
+    }
+    try {
+        const userRef = db.collection('users').doc(id);
+        const userDoc = await userRef.get();
 
+        if (!userDoc.exists) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
 
-module.exports = { registerUser, loginUser,logoutUser, addToWatchlist, getWatchlist, getUsers, deleteMovieFromWatchlist };
+        await userRef.update({
+            name,
+            email,
+            role,
+            updatedAt: new Date().toISOString(),
+        });
+
+        res.status(200).json({ message: 'User updated successfully.' });
+    } catch (error) {
+        console.error('Error updating user:', error);
+        res.status(500).json({ error: 'Server error.' });
+    }
+};
+
+const deleteUser = async (req, res) => {
+    const { id } = req.params;
+  
+    if (!id) {
+      return res.status(400).json({ error: 'User ID is required.' });
+    }
+  
+    try {
+      const userRef = db.collection('users').doc(id);
+      const userDoc = await userRef.get();
+  
+      if (!userDoc.exists) {
+        return res.status(404).json({ error: 'User not found.' });
+      }
+  
+      await userRef.delete();
+      res.status(200).json({ message: 'User deleted successfully.' });
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      res.status(500).json({ error: 'Internal server error.' });
+    }
+  };
+  
+  
+  
+
+module.exports = { registerUser, loginUser,logoutUser, addToWatchlist, getWatchlist, getUsers, deleteMovieFromWatchlist, updateUser, deleteUser };

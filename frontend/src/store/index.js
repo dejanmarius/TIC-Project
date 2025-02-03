@@ -25,10 +25,7 @@ const store = createStore({
       state.userName = userName;
       state.userId = userId;
 
-      localStorage.setItem('isAuthenticated', isAuthenticated);
-      localStorage.setItem('userRole', userRole);
-      localStorage.setItem('userName', userName);
-      localStorage.setItem('userId', userId);
+  
     },
     clearAuthState(state) {
       state.isAuthenticated = false;
@@ -36,10 +33,7 @@ const store = createStore({
       state.userName = null;
       state.userId = null;
 
-      localStorage.removeItem('isAuthenticated');
-      localStorage.removeItem('userRole');
-      localStorage.removeItem('userName');
-      localStorage.removeItem('userId');
+
     },
   },
   actions: {
