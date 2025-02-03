@@ -12,6 +12,7 @@ const routes = [
     path: '/',
     name: 'Home', 
     component: HomePage, 
+    props: route => ({ search: route.query.search }),
   },
   {
     path: '/login',
@@ -29,7 +30,7 @@ const routes = [
     component: WatchlistPage,
   },
   {
-    path: '/movie/:id',
+    path: '/movies/:id',
     name: 'MovieDetailPage',
     component: MovieDetailPage,
     props: true, // Permite transmiterea parametrului `id` ca prop
@@ -38,6 +39,7 @@ const routes = [
     path:'/adminDashboard',
     name:'AdminDashboard',
     component: AdminPage,
+    
   }
 ];
 

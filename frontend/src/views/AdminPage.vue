@@ -125,6 +125,14 @@ export default {
     await this.fetchUsers();
     await this.fetchMovies();
   },
+  mounted() {
+    const isAuthenticated = this.$store.getters.isAuthenticated;
+    const userRole = this.$store.getters.getUserRole;
+
+    if (!isAuthenticated || userRole !== 'admin') {
+      this.$router.push('/');
+    }
+  },
   methods: {
     async fetchUsers() {
       try {
