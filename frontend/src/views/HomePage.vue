@@ -75,34 +75,34 @@ export default {
       this.searchQuery = query;
     }
 
-    ,
-    async addToWatchlist(movie) {
-      const userId = this.$store.getters.getUserId;
-      try {
-        const response = await fetch(`http://localhost:3000/users/${userId}/watchlist`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            movieId: movie.id,
-          }),
-          credentials: 'include',
-        });
+    // ,
+    // async addToWatchlist(movie) {
+    //   const userId = this.$store.getters.getUserId;
+    //   try {
+    //     const response = await fetch(`http://localhost:3000/users/${userId}/watchlist`, {
+    //       method: 'POST',
+    //       headers: {
+    //         'Content-Type': 'application/json',
+    //       },
+    //       body: JSON.stringify({
+    //         movieId: movie.id,
+    //       }),
+    //       credentials: 'include',
+    //     });
 
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Movie added to watchlist:', data);
+    //     if (response.ok) {
+    //       const data = await response.json();
+    //       console.log('Movie added to watchlist:', data);
 
-          movie.inWatchlist = !movie.inWatchlist;
-        } else {
-          const errorData = await response.json();
-          console.error('Failed to add movie to the watchlist:', errorData.message);
-        }
-      } catch (error) {
-        console.error(`Error occurred while adding '${movie.title}' to the watchlist: ${error.message}`);
-      }
-    },
+    //       movie.inWatchlist = !movie.inWatchlist;
+    //     } else {
+    //       const errorData = await response.json();
+    //       console.error('Failed to add movie to the watchlist:', errorData.message);
+    //     }
+    //   } catch (error) {
+    //     console.error(`Error occurred while adding '${movie.title}' to the watchlist: ${error.message}`);
+    //   }
+    // },
   }
 };
 
