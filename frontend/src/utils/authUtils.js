@@ -7,7 +7,9 @@ async function handleTokenExpiration(store, router) {
       });
   
       store.commit('clearAuthState');
-      router.push('/login');
+      setTimeout(() => {
+        router.push('/login'); 
+      }, 4000);
       errorMessage = 'Your session has expired. Please log in again.';
     } catch (error) {
       errorMessage = 'An error occurred during logout. Please try again.';
