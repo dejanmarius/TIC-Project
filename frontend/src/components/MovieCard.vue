@@ -18,6 +18,7 @@
       </v-btn>
     </v-card-actions>
   </v-card>
+  <v-snackbar v-model="snack.visible" :color="snack.color" top  timeout = 3000  text >{{ snack.message }} </v-snackbar>
 </template>
 
 
@@ -31,7 +32,11 @@ export default {
   },
   data() {
     return {
-
+      snack: {
+        visible: false,
+        message: '',
+        color: '',
+      },
     };
   },
   methods: {
@@ -62,11 +67,19 @@ export default {
         });
 
         if (response.ok) {
-          const data = await response.json();
           movie.inWatchList = !movie.inWatchList;
-          console.log('Watchlist updated successfully:', data);
         } else {
-          console.error('Error updating watchlist:', response.status);
+          if (response.status === 409) {
+            this.snack.message = 'Movie already in watchlist';
+            this.snack.color = 'yellow';
+            this.snack.visible = true;
+          }
+          else {
+            this.snack.message = 'Error updating watchlist';
+            this.snack.color = 'red';
+            this.snack.visible = true;
+            console.error('Error updating watchlist:', response.status);
+          }
         }
       } catch (error) {
         console.error('Error toggling watchlist:', error);

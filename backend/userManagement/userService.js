@@ -107,13 +107,25 @@ const addToWatchlist = async (req, res) => {
 
         console.log(`Adding movieId ${movieId} to userId ${userId} watchlist`);
 
+        const userRef = db.collection('users').doc(userId);
+        const userDoc = await userRef.get();
+
+        if (!userDoc.exists) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        const watchlist = userDoc.data().watchlist || [];
+        const movieExists = watchlist.some(item => item.movieId === movieId);
+
+        if (movieExists) {
+            return res.status(409).json({ message: "Movie is already in the watchlist." });
+        }
 
         const watchlistItem = {
             movieId: movieId,
-            addedAt: new Date().toISOString() 
+            addedAt: new Date().toISOString()
         };
 
-        const userRef = db.collection('users').doc(userId);
         await userRef.update({
             watchlist: admin.firestore.FieldValue.arrayUnion(watchlistItem)
         });
@@ -124,6 +136,7 @@ const addToWatchlist = async (req, res) => {
         res.status(500).json({ message: "Internal server error." });
     }
 };
+
 
 const getWatchlist = async (req, res) => {
     try {
