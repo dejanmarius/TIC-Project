@@ -16,9 +16,7 @@
           <v-btn @click="toggleSortDirection" icon color="#3c4ebe" class="sort-button">
             <v-icon>{{ sortDirection === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}</v-icon>
           </v-btn>
-          <v-btn icon class="filter-button">
-            <v-icon>mdi-tune</v-icon>
-          </v-btn>
+          
         </div>
       </div>
 
